@@ -32,7 +32,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.lab.setGeometry(0, 50, 50, 50)
         pixmap = QPixmap('logo.jpg').scaled(50, 50)
         self.lab.setPixmap(pixmap)
-        TabWidget.setObjectName("TabWidget")
+        TabWidget.setObjectName("CSC3180 Project - Chat Bot")
         TabWidget.resize(658, 505)
         self.TabWidget = TabWidget
         self.tab = QtWidgets.QWidget()
@@ -144,7 +144,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
     def sendMessageUser(self):
         text = self.textEdit.toPlainText()
         # Add text to the box
-        self.textBrowser_2.append('Me: {}'.format(text))
+        self.textBrowser_2.append('Me: \n{}'.format(text))
         # Move cursor to the end
         self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
         # TODO: send the user input to AI
@@ -152,7 +152,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
     # TODO: AI sends output to here
     def sendMessageBot(self, text):
         # Add text to the box
-        self.textBrowser_2.append('Bot: {}'.format(text))
+        self.textBrowser_2.append('Bot: \n{}'.format(text))
         # Move cursor to the end
         self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
 
