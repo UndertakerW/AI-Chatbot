@@ -1,0 +1,88 @@
+{"knowledge": [
+    {"tag": "greeting",
+     "in": ["Hi", "Hey", "Hello", "Hello there", "Good morning", "Good afternoon", "Good evening", "Nice to meet you"],
+     "out": ["Hello, {}, nice to meet you!", "{}, good to see you again!", "Hey {}, how can I help?"],
+     "context": [""]
+    },
+    {"tag": "ask_user_info",
+     "in": ["Who am I?", "What is my name?"],
+     "out": ["Your name is {}, my lord."],
+     "context": [""]
+    },
+    {"tag": "ask_what",
+     "in": ["What is your name?", "Who are you?"],
+     "out": ["My name is Friday, your loyal assistant."],
+     "context": [""]
+    },
+    {"tag": "shut_up",
+     "in": ["Shut up", "Fuck you", "So stupid", "dick"],
+     "out": ["Please be friendly!", "Be patient!", "It is not polite"],
+     "context": [""]
+    },
+    {"tag": "good_job",
+     "in": ["Good job", "Nice Work", "You are right", "Congratulation"],
+     "out": ["Thank you for your appreciation!"],
+     "context": [""]
+    },
+    {"tag": "apologize",
+     "in": ["I am sorry", "My bad", "I apologize"],
+     "out": ["Never mind.", "It is fine."],
+     "context": [""]
+    },
+    {"tag": "ask_how",
+     "in": ["How are you", "Are you ok?"],
+     "out": ["I am good, thanks for your consideration."],
+     "context": [""]
+    },
+    {"tag": "ask_how_old",
+     "in": ["How are old you", "What is your age"],
+     "out": ["I am 1 week old."],
+     "context": [""]
+    },
+    {"tag": "happy",
+     "in": ["I am happy", "I am good", "I am really happy", "Today is a wonderful day."],
+     "out": ["Nice to hear that!", "Me too!"],
+     "context": [""]
+    },
+    {"tag": "sad",
+     "in": ["I am unhappy", "I am sad", "I am not good", "I feel not good"],
+     "out": ["Sorry to hear that.", "Every thing will be OK."],
+     "context": [""]
+    },
+    {"tag": "love",
+     "in": ["I love you", "I like you"],
+     "out": ["Really?!", "Me too!"],
+     "context": [""]
+    },
+    {"tag": "farewell",
+     "in": ["Bye", "See you later", "Goodbye"],
+     "out": ["See you!", "Have a nice day.", "Bye bye!"],
+     "context": [""]
+    },
+    {"tag": "appreciation",
+     "in": ["Thanks", "Thank you"],
+     "out": ["You are welcome!", "My pleasure!"],
+     "context": [""]
+    },
+    {"tag": "options",
+     "in": ["How you could help me?", "What can you do?", "What is your function?"],
+     "out": ["I am a chat robot which can assist your daily work. Here is my function.\n 1. Search information online\n 2. Filter your email\n 3. Schedule your affairs according to significance\n 4. have a free talk with you"],
+     "context": [""]
+    },
+    {"tag": "task_affair",
+     "in": ["Order the Affair", "Schedule the Affair", "Help me schedule my Affair", "Affair Scheduler", "What is my plan"],
+     "out": ["The affairs are scheduled according to significance!"],
+     "context": [""]
+    },
+    {"tag": "task_search",
+     "in": ["Search for the weather today", "Search for what time is it in BeiJing?"],
+     "out": ["I will google for you."],
+     "context": [""]
+    },
+    {"tag": "task_email",
+     "in": ["Filter my email", "Help me to filter my email", "Email filter", "Show me the email"],
+     "out": ["The email is filtered!"],
+     "context": [""]
+    }
+  ]
+}
