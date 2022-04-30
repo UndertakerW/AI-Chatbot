@@ -60,7 +60,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 1149, 179))
         self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
         self.textEdit = QtWidgets.QTextEdit(self.scrollAreaWidgetContents_2)
-        self.textEdit.setGeometry(QtCore.QRect(-30, 0, 1161, 181))
+        self.textEdit.setGeometry(QtCore.QRect(0, 0, 1161, 181))
         self.textEdit.setObjectName("textEdit")
         self.verticalScrollBar_2 = QtWidgets.QScrollBar(self.scrollAreaWidgetContents_2)
         self.verticalScrollBar_2.setGeometry(QtCore.QRect(1130, 0, 16, 181))
@@ -69,6 +69,8 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)
         self.pushButton = QtWidgets.QPushButton(self.tab)
         self.pushButton.setGeometry(QtCore.QRect(1180, 490, 71, 181))
+        self.pushButton.clicked.connect(self.sendMessageUser)
+        self.pushButton.setShortcut('alt')
         font = QtGui.QFont()
         font.setPointSize(15)
         self.pushButton.setFont(font)
@@ -176,6 +178,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
 
     def sendMessageUser(self):
         text = self.textEdit.toPlainText()
+        self.textEdit.clear()
         # Add text to the box
         self.textBrowser_2.append('Me: \n{}'.format(text))
         # Move cursor to the end
