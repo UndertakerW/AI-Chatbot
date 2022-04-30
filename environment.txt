@@ -1,0 +1,5 @@
+pip install pyqt5
+pip install pyqt5-tools
+pip install requests
+pip install system_hotkey
+pip install pywin32
