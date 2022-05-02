@@ -13,7 +13,7 @@ from time import sleep
 def searchKeyword(keyword, num_results=10):
     result = list()
     for url in search(keyword, stop=num_results, pause=0):
-        #print(url)
+        print(url)
         try:
             html = request.urlopen(url).read().decode('utf8')
             soup = BeautifulSoup(html, 'html.parser')
@@ -23,8 +23,8 @@ def searchKeyword(keyword, num_results=10):
             result.append(('Webpage', url))
     return result
 
-def botSearchKeyword(ui, keyword, num_results=10):
-    result = searchKeyword(keyword, num_results=10)
+def botSearchKeyword(ui, keyword, num_results=5):
+    result = searchKeyword(keyword, num_results=num_results)
     text = ''
     for (title, url) in result:
         text += title

@@ -235,10 +235,16 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
 
         # Use thread to call bot
         try:
-            if self.t.isRunning:
+            if self.t.isRunning():
                 # self.t.raise_exception()
                 msg = 'I am still thinking about \'' + self.input_buffer + '\', please wait a minute.'
                 self.sendMessageBot(msg)
+            else:
+                self.input_buffer = text
+                #self.t.output.disconnect(self.sendMessageBot)
+                self.t = uiThreadSearch(self, text)
+                self.t.output.connect(self.sendMessageBot)
+                self.t.start()
         except:
             self.input_buffer = text
             self.t = uiThreadSearch(self, text)
