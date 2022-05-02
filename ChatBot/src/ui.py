@@ -18,58 +18,14 @@ from PyQt5.QtCore import QFileInfo
 from system_hotkey import SystemHotkey
 
 from search import searchKeyword
-from search import botSearchKeyword
-from threading import Thread
-import threading
-import ctypes
-import time
-
-class uiThread(QtCore.QThread):
-    output = QtCore.pyqtSignal(str)
-
-    def run(self):
-        # do something
-        return
-
-    def get_id(self):
- 
-        # returns id of the respective thread
-        if hasattr(self, '_thread_id'):
-            return self._thread_id
-        for id, thread in threading._active.items():
-            if thread is self:
-                return id
-  
-    def raise_exception(self):
-        thread_id = self.get_id()
-        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
-              ctypes.py_object(SystemExit))
-        if res > 1:
-            ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
-            print('Exception raise failure')
-
-class uiThreadSearch(uiThread):
-
-    def __init__(self, ui, text):
-        uiThread.__init__(self)
-        self.ui = ui
-        self.text = text
-
-    def run(self):
-        result = botSearchKeyword(self.ui, self.text)
-        self.output.emit(result)
-        
 
 class Ui_TabWidget(QtWidgets.QTabWidget):
     sig_keyhot = pyqtSignal(str)
-    bot_output = pyqtSignal(str)
-    ui_instance = None
 
     def __init__(self):
         QtWidgets.QTabWidget.__init__(self)
         self.setupUi(self)
         self.retranslateUi(self)
-        ui_instance = self
 
     def setupUi(self, TabWidget):
         # self.setWindowIcon(QIcon('logo.jpg'))
@@ -79,7 +35,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         # pixmap = QPixmap('logo.jpg').scaled(50, 50)
         # self.lab.setPixmap(pixmap)
         root = QFileInfo(__file__).absolutePath()
-        self.setWindowIcon(QIcon(root+'\logo.ico'))
+        self.setWindowIcon(QIcon('logo.ico'))
         TabWidget.setObjectName("TabWidget")
         TabWidget.resize(1280, 720)
         self.TabWidget = TabWidget
@@ -232,21 +188,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         # Move cursor to the end
         self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
         # TODO: send the user input to AI
-
-        # Use thread to call bot
-        try:
-            if self.t.isRunning:
-                # self.t.raise_exception()
-                msg = 'I am still thinking about \'' + self.input_buffer + '\', please wait a minute.'
-                self.sendMessageBot(msg)
-        except:
-            self.input_buffer = text
-            self.t = uiThreadSearch(self, text)
-            self.t.output.connect(self.sendMessageBot)
-            self.t.start()
-            
-        # t = Thread(target=botSearchKeyword, args=(self, text,))
-        # t.start()
+        self.sendMessageBot(searchKeyword(text))
 
     # TODO: AI sends output to here
     def sendMessageBot(self, text):
@@ -254,6 +196,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.textBrowser_2.append('Bot: \n{}'.format(text))
         # Move cursor to the end
         self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
