@@ -31,7 +31,7 @@ def handle_user_request(choice, checklist, datelist):
             print(i + 1, checklist[i], datelist[i], "is the ddl")
         return checklist, datelist
     if choice == 2:
-        entry_time = input('Type the ddl time here: ')
+        entry_time = input('Type the ddl time here: ') #The input format must be month.date, like 5.20, 12.25
         datelist.append(entry_time)
         new_entry = input('Type you new to-do here: ')
         checklist.append(new_entry)
@@ -88,19 +88,18 @@ def range_user_lists(checklist, datelist):
 def schedule(ui, text):
     checklist = []
     datelist = []
-    while True:
-        choice = get_user_choice(text)
-        if choice < 1 or choice > 5:
-            print('Invalid input!')
-            continue
-        if choice == 5:
-            if warning_message():
-                print('Goodbye!')
-                break
-        else:
-            handle_user_request(choice, checklist, datelist)
+    choice = get_user_choice(text)
+    if choice < 1 or choice > 5:
+        print('Invalid input!')
+    if choice == 5:
+        if warning_message():
+            print('Goodbye!')
+    else:
+        handle_user_request(choice, checklist, datelist)
 
 
 # Main function
 if __name__ == '__main__':
+    # schedule(2)
     pass
+
