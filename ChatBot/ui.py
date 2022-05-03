@@ -279,7 +279,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
     def endVoiceRecording(self):
         #print("End voice recording")
         msg = ""
-        self.sendMessageUserFromTextEdit(msg)
+        self.sendMessageUser(msg)
         return
 
 if __name__ == '__main__':
