@@ -19,6 +19,8 @@ from system_hotkey import SystemHotkey
 
 from search import searchKeyword
 from search import botSearchKeyword
+from filter import filterEmail
+from affairscheduler import schedule
 from threading import Thread
 import threading
 import ctypes
@@ -62,8 +64,44 @@ class uiThreadSearch(uiThread):
             result = '''We are having trouble communicating with Google,
                 please check your internet connection or try again later.'''
             self.output.emit(result)
-        
+            
+class uiThreadEmailFilter(uiThread):
 
+    def __init__(self, ui, text):
+        uiThread.__init__(self)
+        self.ui = ui
+        self.text = text
+
+    def run(self):
+        try:
+            result = filterEmail(self.ui, self.text)
+            self.output.emit(result)
+        except:
+            result = '''We are having trouble filtering the email,
+                please try again later.'''
+            self.output.emit(result)
+            
+class uiThreadAffairScheduler(uiThread):
+
+    def __init__(self, ui, text):
+        uiThread.__init__(self)
+        self.ui = ui
+        self.text = text
+
+    def run(self):
+        try:
+            ‘’‘
+            schedule这个函数内部运行逻辑是用户先输入1-5数字作为选项，如1是列出所有事件，2是添加事件，3是修改事件，4是删除事件，5退出该功能。
+            像用户如果选择了选项2的话，用户还需要继续输入事件的截止日期和事件内容。选项3需要用户选择某一事件和修改相应内容，选项4需要用户选择删除的事件。
+            这后面用户继续的输入的获取和传送应该需要学长再加一点代码逻辑或者改一下我的代码
+            ’‘’
+            result = schedule(self.ui, self.text)
+            self.output.emit(result)
+        except:
+            result = '''We are having trouble loading scheduler,
+                please try again later.'''
+            self.output.emit(result)
+            
 class Ui_TabWidget(QtWidgets.QTabWidget):
     sig_keyhot = pyqtSignal(str)
     bot_output = pyqtSignal(str)
@@ -255,7 +293,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         # Start a new task
         except:
             self.input_buffer = text
-            self.t = uiThreadSearch(self, text)
+            self.t = uiThreadSearch(self, text) #self.t = uiThreadAffairScheduler(self, text) or self.t = uiThreadEmailFilter(self, text)
             self.t.output.connect(self.sendMessageBot)
             self.t.start()
 
