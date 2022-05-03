@@ -90,6 +90,11 @@ class uiThreadAffairScheduler(uiThread):
 
     def run(self):
         try:
+            ‘’‘
+            schedule这个函数内部运行逻辑是用户先输入1-5数字作为选项，如1是列出所有事件，2是添加事件，3是修改事件，4是删除事件，5退出该功能。
+            像用户如果选择了选项2的话，用户还需要继续输入事件的截止日期和事件内容。选项3需要用户选择某一事件和修改相应内容，选项4需要用户选择删除的事件。
+            这后面用户继续的输入的获取和传送应该需要学长再加一点代码逻辑或者改一下我的代码
+            ’‘’
             result = schedule(self.ui, self.text)
             self.output.emit(result)
         except:
@@ -288,7 +293,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         # Start a new task
         except:
             self.input_buffer = text
-            self.t = uiThreadSearch(self, text)
+            self.t = uiThreadSearch(self, text) #self.t = uiThreadAffairScheduler(self, text) or self.t = uiThreadEmailFilter(self, text)
             self.t.output.connect(self.sendMessageBot)
             self.t.start()
 
