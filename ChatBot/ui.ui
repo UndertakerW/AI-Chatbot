@@ -19,7 +19,7 @@
    <string>TabWidget</string>
   </property>
   <property name="currentIndex">
-   <number>1</number>
+   <number>0</number>
   </property>
   <widget class="QWidget" name="tab">
    <attribute name="title">
@@ -76,7 +76,7 @@
      <rect>
       <x>20</x>
       <y>489</y>
-      <width>1151</width>
+      <width>1121</width>
       <height>181</height>
      </rect>
     </property>
@@ -88,7 +88,7 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>1149</width>
+       <width>1119</width>
        <height>179</height>
       </rect>
      </property>
@@ -97,7 +97,7 @@
        <rect>
         <x>-30</x>
         <y>0</y>
-        <width>1161</width>
+        <width>1131</width>
         <height>181</height>
        </rect>
       </property>
@@ -105,7 +105,7 @@
      <widget class="QScrollBar" name="verticalScrollBar_2">
       <property name="geometry">
        <rect>
-        <x>1130</x>
+        <x>1100</x>
         <y>0</y>
         <width>16</width>
         <height>181</height>
@@ -120,10 +120,10 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>1180</x>
-      <y>490</y>
-      <width>71</width>
-      <height>181</height>
+      <x>1150</x>
+      <y>560</y>
+      <width>101</width>
+      <height>111</height>
      </rect>
     </property>
     <property name="font">
@@ -133,6 +133,24 @@
     </property>
     <property name="text">
      <string>Send</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_speak">
+    <property name="geometry">
+     <rect>
+      <x>1150</x>
+      <y>490</y>
+      <width>101</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>15</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Speak</string>
     </property>
    </widget>
   </widget>

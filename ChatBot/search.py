@@ -18,7 +18,7 @@ def searchKeyword(keyword, num_results=10):
             html = request.urlopen(url).read().decode('utf8')
             soup = BeautifulSoup(html, 'html.parser')
             title = soup.find('title')
-            result.append((title.string, url))
+            result.append((title.string.strip(), url))
         except:
             result.append(('Webpage', url))
     return result

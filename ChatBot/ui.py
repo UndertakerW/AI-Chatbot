@@ -32,7 +32,6 @@ class uiThread(QtCore.QThread):
         return
 
     def get_id(self):
- 
         # returns id of the respective thread
         if hasattr(self, '_thread_id'):
             return self._thread_id
@@ -56,8 +55,13 @@ class uiThreadSearch(uiThread):
         self.text = text
 
     def run(self):
-        result = botSearchKeyword(self.ui, self.text)
-        self.output.emit(result)
+        try:
+            result = botSearchKeyword(self.ui, self.text)
+            self.output.emit(result)
+        except:
+            result = '''We are having trouble communicating with Google,
+                please check your internet connection or try again later.'''
+            self.output.emit(result)
         
 
 class Ui_TabWidget(QtWidgets.QTabWidget):
@@ -86,43 +90,43 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
         self.scrollArea = QtWidgets.QScrollArea(self.tab)
-        self.scrollArea.setGeometry(QtCore.QRect(20, 20, 1231, 451))
+        self.scrollArea.setGeometry(QtCore.QRect(20, 20, 1240, 451))
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1229, 449))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1240, 449))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.textBrowser_2 = QtWidgets.QTextBrowser(self.scrollAreaWidgetContents)
-        self.textBrowser_2.setGeometry(QtCore.QRect(0, 0, 1211, 451))
+        self.textBrowser_2.setGeometry(QtCore.QRect(0, 0, 1240, 451))
         self.textBrowser_2.setObjectName("textBrowser_2")
-        self.verticalScrollBar = QtWidgets.QScrollBar(self.scrollAreaWidgetContents)
-        self.verticalScrollBar.setGeometry(QtCore.QRect(1210, 0, 16, 451))
-        self.verticalScrollBar.setOrientation(QtCore.Qt.Vertical)
-        self.verticalScrollBar.setObjectName("verticalScrollBar")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.scrollArea_2 = QtWidgets.QScrollArea(self.tab)
-        self.scrollArea_2.setGeometry(QtCore.QRect(20, 489, 1151, 181))
+        self.scrollArea_2.setGeometry(QtCore.QRect(20, 489, 1130, 181))
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollArea_2.setObjectName("scrollArea_2")
         self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 1149, 179))
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 1130, 181))
         self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
         self.textEdit = QtWidgets.QTextEdit(self.scrollAreaWidgetContents_2)
-        self.textEdit.setGeometry(QtCore.QRect(0, 0, 1161, 181))
+        self.textEdit.setGeometry(QtCore.QRect(0, 0, 1131, 181))
         self.textEdit.setObjectName("textEdit")
-        self.verticalScrollBar_2 = QtWidgets.QScrollBar(self.scrollAreaWidgetContents_2)
-        self.verticalScrollBar_2.setGeometry(QtCore.QRect(1130, 0, 16, 181))
-        self.verticalScrollBar_2.setOrientation(QtCore.Qt.Vertical)
-        self.verticalScrollBar_2.setObjectName("verticalScrollBar_2")
         self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)
         self.pushButton = QtWidgets.QPushButton(self.tab)
-        self.pushButton.setGeometry(QtCore.QRect(1180, 490, 71, 181))
-        self.pushButton.clicked.connect(self.sendMessageUser)
+        self.pushButton.setGeometry(QtCore.QRect(1150, 551, 110, 120))
+        self.pushButton.clicked.connect(self.sendMessageUserFromTextEdit)
         self.pushButton.setShortcut('alt')
         font = QtGui.QFont()
         font.setPointSize(15)
         self.pushButton.setFont(font)
         self.pushButton.setObjectName("pushButton")
+        self.pushButton_speak = QtWidgets.QPushButton(self.tab)
+        self.pushButton_speak.setGeometry(QtCore.QRect(1150, 490, 110, 61))
+        font = QtGui.QFont()
+        font.setPointSize(15)
+        self.pushButton_speak.setFont(font)
+        self.pushButton_speak.setObjectName("pushButton_speak")
+        self.pushButton_speak.pressed.connect(self.startVoiceRecording)
+        self.pushButton_speak.released.connect(self.endVoiceRecording)
         TabWidget.addTab(self.tab, "")
 
         self.tab_2 = QtWidgets.QWidget()
@@ -188,6 +192,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         _translate = QtCore.QCoreApplication.translate
         TabWidget.setWindowTitle(_translate("TabWidget", "CSC3180 Project Chat Bot"))
         self.pushButton.setText(_translate("TabWidget", "Send"))
+        self.pushButton_speak.setText(_translate("TabWidget", "Speak"))
 
         TabWidget.setTabText(TabWidget.indexOf(self.tab),
                              _translate("TabWidget", "CHAT"))
@@ -224,42 +229,58 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         font.setPointSize(int(text))
         self.TabWidget.setFont(font)
 
-    def sendMessageUser(self):
-        text = self.textEdit.toPlainText()
-        self.textEdit.clear()
+    def sendMessageUser(self, text):
         # Add text to the box
-        self.textBrowser_2.append('Me: \n{}'.format(text))
+        self.textBrowser_2.append('[Me] \n{}'.format(text))
         # Move cursor to the end
         self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
         # TODO: send the user input to AI
 
         # Use thread to call bot
         try:
+            # If the thread is running (bot is processing the previous task)
+            # Tell user that it is busy and ignore the new input
             if self.t.isRunning():
                 # self.t.raise_exception()
                 msg = 'I am still thinking about \'' + self.input_buffer + '\', please wait a minute.'
                 self.sendMessageBot(msg)
+            # If the bot is not busy, start a new task
             else:
                 self.input_buffer = text
                 #self.t.output.disconnect(self.sendMessageBot)
                 self.t = uiThreadSearch(self, text)
                 self.t.output.connect(self.sendMessageBot)
                 self.t.start()
+        # If self.t is not defined (the first task)
+        # Start a new task
         except:
             self.input_buffer = text
             self.t = uiThreadSearch(self, text)
             self.t.output.connect(self.sendMessageBot)
             self.t.start()
-            
-        # t = Thread(target=botSearchKeyword, args=(self, text,))
-        # t.start()
 
+    def sendMessageUserFromTextEdit(self):
+        text = self.textEdit.toPlainText()
+        self.textEdit.clear()
+        self.sendMessageUser(text)
+        
     # TODO: AI sends output to here
     def sendMessageBot(self, text):
         # Add text to the box
-        self.textBrowser_2.append('Bot: \n{}'.format(text))
+        self.textBrowser_2.append('[Bot] \n{}'.format(text))
         # Move cursor to the end
         self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
+
+    # TODO: Voice recognition interface
+    def startVoiceRecording(self):
+        #print("Start voice recording")
+        return
+
+    def endVoiceRecording(self):
+        #print("End voice recording")
+        msg = ""
+        self.sendMessageUserFromTextEdit(msg)
+        return
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
