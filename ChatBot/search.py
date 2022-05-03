@@ -12,7 +12,7 @@ from time import sleep
 
 def searchKeyword(keyword, num_results=10):
     result = list()
-    for url in search(keyword, stop=num_results, pause=0):
+    for url in search(keyword[:30], stop=num_results, pause=0):
         print(url)
         try:
             html = request.urlopen(url).read().decode('utf8')
@@ -31,6 +31,7 @@ def botSearchKeyword(ui, keyword, num_results=5):
         text += '\n'
         text += url
         text += '\n'
+    text = text[:-1]
     #ui.bot_output.emit(text)
     #print('search done')
     return text
