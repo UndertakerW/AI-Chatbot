@@ -12,8 +12,8 @@ import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QFont, QIcon, QPixmap
-from PyQt5.QtWidgets import QApplication, QFontDialog, QLabel, QFileDialog
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QColor
+from PyQt5.QtWidgets import QApplication, QFontDialog, QLabel, QFileDialog, QSizePolicy
 from PyQt5.QtCore import QFileInfo
 from system_hotkey import SystemHotkey
 
@@ -67,13 +67,13 @@ class uiThreadSearch(uiThread):
 class Ui_TabWidget(QtWidgets.QTabWidget):
     sig_keyhot = pyqtSignal(str)
     bot_output = pyqtSignal(str)
-    ui_instance = None
 
     def __init__(self):
         QtWidgets.QTabWidget.__init__(self)
         self.setupUi(self)
         self.retranslateUi(self)
-        ui_instance = self
+        self.dialog_id = 0
+        self.msgBoxes = list()
 
     def setupUi(self, TabWidget):
         # self.setWindowIcon(QIcon('logo.jpg'))
@@ -94,12 +94,18 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1240, 449))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1240, 451))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        self.textBrowser_2 = QtWidgets.QTextBrowser(self.scrollAreaWidgetContents)
-        self.textBrowser_2.setGeometry(QtCore.QRect(0, 0, 1240, 451))
-        self.textBrowser_2.setObjectName("textBrowser_2")
+        # self.scrollAreaWidgetContents.set
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        # self.verticalLayoutWidget = QtWidgets.QWidget(self.scrollAreaWidgetContents)
+        # self.verticalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 1240, 451))
+        # self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
+        #self.verticalLayoutWidget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.scrollArea_2 = QtWidgets.QScrollArea(self.tab)
         self.scrollArea_2.setGeometry(QtCore.QRect(20, 489, 1130, 181))
         self.scrollArea_2.setWidgetResizable(True)
@@ -127,6 +133,10 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.pushButton_speak.setObjectName("pushButton_speak")
         self.pushButton_speak.pressed.connect(self.startVoiceRecording)
         self.pushButton_speak.released.connect(self.endVoiceRecording)
+        # self.verticalScrollBar = QtWidgets.QScrollBar(self.scrollArea)
+        # self.verticalScrollBar.setGeometry(QtCore.QRect(1250, 40, 16, 160))
+        # self.verticalScrollBar.setOrientation(QtCore.Qt.Vertical)
+        # self.verticalScrollBar.setObjectName("verticalScrollBar")
         TabWidget.addTab(self.tab, "")
 
         self.tab_2 = QtWidgets.QWidget()
@@ -230,10 +240,11 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.TabWidget.setFont(font)
 
     def sendMessageUser(self, text):
+        self.addDialog("User", text)
         # Add text to the box
-        self.textBrowser_2.append('[Me] \n{}'.format(text))
+        #self.textBrowser_2.append('[Me] \n{}'.format(text))
         # Move cursor to the end
-        self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
+        #self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
         # TODO: send the user input to AI
 
         # Use thread to call bot
@@ -266,10 +277,49 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         
     # TODO: AI sends output to here
     def sendMessageBot(self, text):
+        self.addDialog("Bot", text)
         # Add text to the box
-        self.textBrowser_2.append('[Bot] \n{}'.format(text))
+        # self.textBrowser_2.append('[Bot] \n{}'.format(text))
         # Move cursor to the end
-        self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
+        # self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
+
+    def addDialog(self, sender, text):
+        # w = QtWidgets.QTextBrowser(self)
+        # w.append('[{}] \n{}'.format(sender, text))
+        # w.setLayout(self.verticalLayout)
+        # #area = QtWidgets.QScrollArea(self)
+        # self.verticalLayout.addWidget(w)
+        # #self.scrollArea.setWidget(self.verticalLayoutWidget)
+        # #area.setWidget(w)
+        # return
+
+
+    
+        msgBox = QtWidgets.QTextBrowser(self)
+        #msgBox.show()
+        #self.msgBoxes[self.dialog_id].setLayout(self.verticalLayout)
+        if sender is "User":
+            p = msgBox.palette()
+            p.setColor(msgBox.backgroundRole(), QColor(149, 236, 105))
+            msgBox.setPalette(p)
+        msgBox.setGeometry(QtCore.QRect(0, 0, 1240, 451))
+        msgBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        msgBox.setObjectName("msgBox"+str(self.dialog_id))
+        msgBox.append('[{}] \n{}'.format(sender, text))
+        #a = QtWidgets.QTextBrowser()
+        boxHeight = msgBox.document().size().height() + msgBox.contentsMargins().top()*2
+        #msgBox.setFixedHeight(boxHeight)
+        msgBox.setMinimumHeight(boxHeight)
+        msgBox.setMaximumHeight(boxHeight)
+        self.msgBoxes.append(msgBox)
+        self.verticalLayout.addWidget(msgBox)
+        # height = 0
+        # for b in self.msgBoxes:
+        #     height += b.document().size().height() + b.contentsMargins().top()*2
+        # self.verticalLayoutWidget.setGeometry(0, 0, 1100, height)
+        #a.document().size().height() * 1.2
+
+        #self.verticalLayout.addItem()
 
     # TODO: Voice recognition interface
     def startVoiceRecording(self):
