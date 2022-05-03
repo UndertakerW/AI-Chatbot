@@ -12,8 +12,8 @@ import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QFont, QIcon, QPixmap
-from PyQt5.QtWidgets import QApplication, QFontDialog, QLabel, QFileDialog
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QColor
+from PyQt5.QtWidgets import QApplication, QFontDialog, QLabel, QFileDialog, QSizePolicy
 from PyQt5.QtCore import QFileInfo
 from system_hotkey import SystemHotkey
 
@@ -67,21 +67,19 @@ class uiThreadSearch(uiThread):
 class Ui_TabWidget(QtWidgets.QTabWidget):
     sig_keyhot = pyqtSignal(str)
     bot_output = pyqtSignal(str)
-    ui_instance = None
 
     def __init__(self):
         QtWidgets.QTabWidget.__init__(self)
         self.setupUi(self)
         self.retranslateUi(self)
-        ui_instance = self
+        self.dialog_id = 0
+        self.msgBoxes = list()
+        root = QFileInfo(__file__).absolutePath()
+        self.avatar = QPixmap(root + '\\avatar.ico')
+        self.avatarBot = QPixmap(root + '\\avatarBot.ico')
+
 
     def setupUi(self, TabWidget):
-        # self.setWindowIcon(QIcon('logo.jpg'))
-        # self.show()
-        # self.lab = QLabel('Logo', self)
-        # self.lab.setGeometry(0, 50, 50, 50)
-        # pixmap = QPixmap('logo.jpg').scaled(50, 50)
-        # self.lab.setPixmap(pixmap)
         root = QFileInfo(__file__).absolutePath()
         self.setWindowIcon(QIcon(root+'\logo.ico'))
         TabWidget.setObjectName("TabWidget")
@@ -94,12 +92,16 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1240, 449))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1240, 451))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        self.textBrowser_2 = QtWidgets.QTextBrowser(self.scrollAreaWidgetContents)
-        self.textBrowser_2.setGeometry(QtCore.QRect(0, 0, 1240, 451))
-        self.textBrowser_2.setObjectName("textBrowser_2")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.scrollArea.verticalScrollBar().rangeChanged.connect(
+                self.scrollToBottom, QtCore.Qt.UniqueConnection)
+        self.verticalLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.verticalLayout.setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
+        self.verticalLayout.setAlignment(QtCore.Qt.AlignTop)
         self.scrollArea_2 = QtWidgets.QScrollArea(self.tab)
         self.scrollArea_2.setGeometry(QtCore.QRect(20, 489, 1130, 181))
         self.scrollArea_2.setWidgetResizable(True)
@@ -127,6 +129,10 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.pushButton_speak.setObjectName("pushButton_speak")
         self.pushButton_speak.pressed.connect(self.startVoiceRecording)
         self.pushButton_speak.released.connect(self.endVoiceRecording)
+        # self.verticalScrollBar = QtWidgets.QScrollBar(self.scrollArea)
+        # self.verticalScrollBar.setGeometry(QtCore.QRect(1250, 40, 16, 160))
+        # self.verticalScrollBar.setOrientation(QtCore.Qt.Vertical)
+        # self.verticalScrollBar.setObjectName("verticalScrollBar")
         TabWidget.addTab(self.tab, "")
 
         self.tab_2 = QtWidgets.QWidget()
@@ -153,7 +159,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.comboBox_2.setCurrentIndex(2)
 
         self.pushButton_4 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton_4.clicked.connect(self.setlogo)
+        self.pushButton_4.clicked.connect(self.setAvatar)
         self.pushButton_4.setGeometry(QtCore.QRect(340, 333, 620, 55))
         self.pushButton_4.setObjectName("pushButton_4")
         TabWidget.addTab(self.tab_2, "")
@@ -181,12 +187,11 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         TabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(TabWidget)
 
-    def setlogo(self):
+    def setAvatar(self):
         filename = QFileDialog.getOpenFileNames(
-            self, 'Select an image', os.getcwd(), "All Files(*);;Text Files(*.txt)")
+            self, 'Select an image', os.getcwd(), "Image Files(*.ico *.jpg *.png *.bmp)")
         print(filename)
-        pixmap = QPixmap(filename[0][0]).scaled(50, 50)
-        self.lab.setPixmap(pixmap)
+        self.avatar = QPixmap(filename[0][0]).scaled(50, 50)
 
     def retranslateUi(self, TabWidget):
         _translate = QtCore.QCoreApplication.translate
@@ -222,18 +227,17 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         font = QtGui.QFont()
         font.setFamily(fontDict[text])
         self.TabWidget.setFont(font)
+        self.resetDialog()
 
     def setFontSize(self):
         text = self.comboBox_2.currentText()
         font = QtGui.QFont()
         font.setPointSize(int(text))
         self.TabWidget.setFont(font)
+        self.resetDialog()
 
     def sendMessageUser(self, text):
-        # Add text to the box
-        self.textBrowser_2.append('[Me] \n{}'.format(text))
-        # Move cursor to the end
-        self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
+        self.addDialog("User", text)
         # TODO: send the user input to AI
 
         # Use thread to call bot
@@ -246,6 +250,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
                 self.sendMessageBot(msg)
             # If the bot is not busy, start a new task
             else:
+                text = text.replace('\n', ' ').replace('\r', ' ')
                 self.input_buffer = text
                 #self.t.output.disconnect(self.sendMessageBot)
                 self.t = uiThreadSearch(self, text)
@@ -254,6 +259,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         # If self.t is not defined (the first task)
         # Start a new task
         except:
+            text = text.replace('\n', ' ').replace('\r', ' ')
             self.input_buffer = text
             self.t = uiThreadSearch(self, text)
             self.t.output.connect(self.sendMessageBot)
@@ -266,10 +272,53 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         
     # TODO: AI sends output to here
     def sendMessageBot(self, text):
-        # Add text to the box
-        self.textBrowser_2.append('[Bot] \n{}'.format(text))
-        # Move cursor to the end
-        self.textBrowser_2.moveCursor(self.textBrowser_2.textCursor().End)
+        self.addDialog("Bot", text)
+
+    def addDialog(self, sender, text):
+        chatBlock = QtWidgets.QLabel()
+        avatar = QtWidgets.QLabel(chatBlock)
+        avatar.setGeometry(10, 10, 50, 50)
+        avatar.setAlignment(QtCore.Qt.AlignCenter)
+        avatar.setScaledContents(True)
+        msgBox = QtWidgets.QTextBrowser(chatBlock)
+        if sender is "User":
+            msgBox.setAutoFillBackground(True)
+            p = msgBox.viewport().palette()
+            p.setColor(msgBox.viewport().backgroundRole(), QColor(149, 236, 105))
+            msgBox.viewport().setPalette(p)
+            avatar.setPixmap(self.avatar)
+        else:
+            avatar.setPixmap(self.avatarBot)
+        msgBox.setGeometry(QtCore.QRect(70, 0, 1170, 451))
+        msgBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        msgBox.setObjectName("msgBox"+str(self.dialog_id))
+        msgBox.append('{}'.format(text))
+        boxHeight = msgBox.document().size().height() * (msgBox.document().lineCount() + 0.1)
+        if boxHeight < 70:
+            boxHeight = 70
+        # print(boxHeight)
+        msgBox.setMinimumHeight(boxHeight)
+        msgBox.setMaximumHeight(boxHeight)
+        self.msgBoxes.append(msgBox)
+        chatBlock.setGeometry(QtCore.QRect(0, 0, 1240, 451))
+        chatBlock.setMinimumHeight(boxHeight)
+        chatBlock.setMaximumHeight(boxHeight)
+        self.verticalLayout.addWidget(chatBlock)
+
+    def resetDialog(self):
+        for msgBox in self.msgBoxes:
+            boxHeight = msgBox.document().size().height() * 1.05
+            if boxHeight < 70:
+                boxHeight = 70
+            print(boxHeight)
+            msgBox.setMinimumHeight(boxHeight)
+            msgBox.setMaximumHeight(boxHeight)
+            msgBox.parentWidget().setMinimumHeight(boxHeight)
+            msgBox.parentWidget().setMaximumHeight(boxHeight)
+
+    def scrollToBottom(self):
+        scrollBar = self.scrollArea.verticalScrollBar()
+        scrollBar.setValue(scrollBar.maximum())
 
     # TODO: Voice recognition interface
     def startVoiceRecording(self):
