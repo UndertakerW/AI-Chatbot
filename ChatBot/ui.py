@@ -19,6 +19,8 @@ from system_hotkey import SystemHotkey
 
 from search import searchKeyword
 from search import botSearchKeyword
+from filter import filterEmail
+from affairscheduler import schedule
 from threading import Thread
 import threading
 import ctypes
@@ -62,8 +64,39 @@ class uiThreadSearch(uiThread):
             result = '''We are having trouble communicating with Google,
                 please check your internet connection or try again later.'''
             self.output.emit(result)
-        
+            
+class uiThreadEmailFilter(uiThread):
 
+    def __init__(self, ui, text):
+        uiThread.__init__(self)
+        self.ui = ui
+        self.text = text
+
+    def run(self):
+        try:
+            result = filterEmail(self.ui, self.text)
+            self.output.emit(result)
+        except:
+            result = '''We are having trouble filtering the email,
+                please try again later.'''
+            self.output.emit(result)
+            
+class uiThreadAffairScheduler(uiThread):
+
+    def __init__(self, ui, text):
+        uiThread.__init__(self)
+        self.ui = ui
+        self.text = text
+
+    def run(self):
+        try:
+            result = schedule(self.ui, self.text)
+            self.output.emit(result)
+        except:
+            result = '''We are having trouble loading scheduler,
+                please try again later.'''
+            self.output.emit(result)
+            
 class Ui_TabWidget(QtWidgets.QTabWidget):
     sig_keyhot = pyqtSignal(str)
     bot_output = pyqtSignal(str)
