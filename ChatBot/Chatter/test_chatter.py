@@ -7,7 +7,6 @@ import speech_recognition as sr
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 from keras.models import load_model
-from interface import *
 
 
 # nltk word package
@@ -99,10 +98,32 @@ def speech2text():
     try:
         text = r.recognize_google(audio)
         print("You said: " + text)
+
     except sr.UnknownValueError:
         print("Google Speech Recognition could not understand audio")
     except sr.RequestError as e:
         print("Could not request results from Google Speech Recognition service" + format(e))
+
+
+def Chatter2UI(msg):
+    print(msg)
+
+
+def UI2Chatter():
+    user_in = input()
+    return user_in
+
+
+def task_affair():
+    return 0
+
+
+def task_email():
+    return 0
+
+
+def task_search(msg):
+    return 0
 
 
 # total chatter

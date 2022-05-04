@@ -66,7 +66,7 @@
     },
     {"tag": "options",
      "in": ["How you could help me?", "What can you do?", "What is your function?"],
-     "out": ["I am a chat robot which can assist your daily work. Here is my function.\n 1. Search information online\n 2. Filter your email\n 3. Schedule your affairs according to significance\n 4. have a free talk with you"],
+     "out": ["I am a chat robot which can assist your daily work. \n 1. Search information online\n 2. Filter your email\n 3. Schedule your affairs according to significance\n 4. have a free talk with you"],
      "context": [""]
     },
     {"tag": "task_affair",

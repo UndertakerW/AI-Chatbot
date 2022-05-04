@@ -10,8 +10,8 @@ import json
 import os
 import sys
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import pyqtSignal
+from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
+from PyQt5.QtCore import pyqtSignal, QUrl
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QColor
 from PyQt5.QtWidgets import QApplication, QFontDialog, QLabel, QFileDialog, QSizePolicy
 from PyQt5.QtCore import QFileInfo
@@ -22,6 +22,17 @@ from threading import Thread
 import threading
 import ctypes
 import time
+
+import pickle
+import numpy as np
+import json
+import random
+import nltk
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet
+from keras.models import load_model
+import speech_recognition as sr
+
 
 class uiThread(QtCore.QThread):
     output = QtCore.pyqtSignal(str)
@@ -61,7 +72,7 @@ class uiThreadSearch(uiThread):
             result = '''We are having trouble communicating with Google,
                 please check your internet connection or try again later.'''
             self.output.emit(result)
-        
+
 
 class Ui_TabWidget(QtWidgets.QTabWidget):
     sig_keyhot = pyqtSignal(str)
@@ -69,18 +80,20 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
 
     def __init__(self):
         QtWidgets.QTabWidget.__init__(self)
+        self.root = QFileInfo(__file__).absolutePath()
         self.setupUi(self)
         self.retranslateUi(self)
         self.dialog_id = 0
         self.msgBoxes = list()
-        root = QFileInfo(__file__).absolutePath()
-        self.avatar = QPixmap(root + '\\avatar.ico')
-        self.avatarBot = QPixmap(root + '\\avatarBot.ico')
+        self.avatar = QPixmap(self.root + '\\avatar.ico')
+        self.avatarBot = QPixmap(self.root + '\\avatarBot.ico')
+        self.ch = Chatter(self)
+        self.audio = None
+        self.r = sr.Recognizer()
 
 
     def setupUi(self, TabWidget):
-        root = QFileInfo(__file__).absolutePath()
-        self.setWindowIcon(QIcon(root+'\logo.ico'))
+        self.setWindowIcon(QIcon(self.root+'\\logo.ico'))
         TabWidget.setObjectName("TabWidget")
         TabWidget.resize(1280, 720)
         self.TabWidget = TabWidget
@@ -126,8 +139,8 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         font.setPointSize(15)
         self.pushButton_speak.setFont(font)
         self.pushButton_speak.setObjectName("pushButton_speak")
-        self.pushButton_speak.pressed.connect(self.startVoiceRecording)
-        self.pushButton_speak.released.connect(self.endVoiceRecording)
+        self.pushButton_speak.clicked.connect(self.startVoiceRecording)
+        # self.pushButton_speak.released.connect(self.endVoiceRecording)
         # self.verticalScrollBar = QtWidgets.QScrollBar(self.scrollArea)
         # self.verticalScrollBar.setGeometry(QtCore.QRect(1250, 40, 16, 160))
         # self.verticalScrollBar.setOrientation(QtCore.Qt.Vertical)
@@ -185,6 +198,18 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.retranslateUi(TabWidget)
         TabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(TabWidget)
+
+        music_file_1 = QUrl.fromLocalFile(self.root + '\\media\\receive.mp3')
+        content_1 = QtMultimedia.QMediaContent(music_file_1)
+        self.player_1 = QtMultimedia.QMediaPlayer()
+        self.player_1.setMedia(content_1)
+        self.player_1.setVolume(30)
+
+        music_file_2 = QUrl.fromLocalFile(self.root + '\\media\\record_start.mp3')
+        content_2 = QtMultimedia.QMediaContent(music_file_2)
+        self.player_2 = QtMultimedia.QMediaPlayer()
+        self.player_2.setMedia(content_2)
+        self.player_2.setVolume(30)
 
     def setAvatar(self):
         filename = QFileDialog.getOpenFileNames(
@@ -252,7 +277,8 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
                 text = text.replace('\n', ' ').replace('\r', ' ')
                 self.input_buffer = text
                 #self.t.output.disconnect(self.sendMessageBot)
-                self.t = uiThreadSearch(self, text)
+                self.t = uiThreadChatter(self, text)
+                #self.t = uiThreadSearch(self, text)
                 self.t.output.connect(self.sendMessageBot)
                 self.t.start()
         # If self.t is not defined (the first task)
@@ -260,17 +286,20 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         except:
             text = text.replace('\n', ' ').replace('\r', ' ')
             self.input_buffer = text
-            self.t = uiThreadSearch(self, text)
+            # self.t = uiThreadSearch(self, text)
+            self.t = uiThreadChatter(self, text)
             self.t.output.connect(self.sendMessageBot)
             self.t.start()
 
     def sendMessageUserFromTextEdit(self):
         text = self.textEdit.toPlainText()
-        self.textEdit.clear()
-        self.sendMessageUser(text)
+        if text != "":
+            self.textEdit.clear()
+            self.sendMessageUser(text)
         
     # TODO: AI sends output to here
     def sendMessageBot(self, text):
+        self.player_1.play()
         self.addDialog("Bot", text)
 
     def addDialog(self, sender, text):
@@ -280,7 +309,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         avatar.setAlignment(QtCore.Qt.AlignCenter)
         avatar.setScaledContents(True)
         msgBox = QtWidgets.QTextBrowser(chatBlock)
-        if sender is "User":
+        if sender == "User":
             msgBox.setAutoFillBackground(True)
             p = msgBox.viewport().palette()
             p.setColor(msgBox.viewport().backgroundRole(), QColor(149, 236, 105))
@@ -291,7 +320,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         msgBox.setGeometry(QtCore.QRect(70, 0, 1170, 451))
         msgBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         msgBox.setObjectName("msgBox"+str(self.dialog_id))
-        msgBox.append('{}'.format(text))
+        msgBox.setText(str(text))
         boxHeight = msgBox.document().size().height() * (msgBox.document().lineCount() + 0.1)
         if boxHeight < 70:
             boxHeight = 70
@@ -319,16 +348,170 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         scrollBar = self.scrollArea.verticalScrollBar()
         scrollBar.setValue(scrollBar.maximum())
 
+    def setTextEdit(self, text):
+        self.textEdit.setText(text)
+
     # TODO: Voice recognition interface
     def startVoiceRecording(self):
-        #print("Start voice recording")
+        self.player_2.play()
+        self.t = uiThreadSpeech(self)
+        self.t.output.connect(self.setTextEdit)
+        self.t.start()
         return
 
-    def endVoiceRecording(self):
-        #print("End voice recording")
-        msg = ""
-        self.sendMessageUser(msg)
+    # def endVoiceRecording(self):
+    #     msg = ""
+    #     return
+
+
+class uiThreadChatter(uiThread):
+    def __init__(self, ui, text):
+        uiThread.__init__(self)
+        self.ui = ui
+        self.ch = ui.ch
+        self.text = text
+
+    def run(self):
+        result = self.ch.UI2Chatter(self.text)
+        self.output.emit(result)
+
+
+class uiThreadSpeech(uiThread):
+    def __init__(self, ui):
+        uiThread.__init__(self)
+        self.ui = ui
+
+    def run(self):
+        with sr.Microphone() as source:
+            print("Say something!")
+            audio = self.ui.r.listen(source)
+            self.ui.player_2.play()
+        try:
+            text = self.ui.r.recognize_google(audio)
+            self.output.emit(text)
+        except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand audio")
+        except sr.RequestError as e:
+            print("Could not request results from Google Speech Recognition service" + format(e))
+
+
+class Chatter:
+    def __init__(self, ex):
+        self.ui = ex
+        # nltk word package
+        # nltk.download('punkt')
+        # nltk.download('wordnet')
+        self.model = load_model(self.ui.root + '\\Chatter\\model\\chatter_model.h5')
+        self.knowledge = json.loads(open(self.ui.root + '\\Chatter\\json\\knowledge.json').read())
+        self.words = pickle.load(open(self.ui.root + '\\Chatter\\pkl\\words.pkl', 'rb'))
+        self.types = pickle.load(open(self.ui.root + '\\Chatter\\pkl\\types.pkl', 'rb'))
+        self.WNL = WordNetLemmatizer()
+        self.user_info = json.loads(open(self.ui.root + '\\Chatter\\json\\user_info.json').read())
+
+        #check whether it is first meet
+        # if self.user_info['user_info']['first_meet'] == 1:
+        #     self.Chatter2UI("Hello, nice to meet you! I am your chat bot.")
+        #     self.Chatter2UI("As this is our first meeting, to provide a better assistance, I would like to ask you some question.")
+        #     self.ui.Chatter2UI("First, what is your name?")
+        #     self.user_info['user_info']['name'] = self.UI2Chatter()
+        #     self.ui.Chatter2UI("Second, what is your gender?")
+        #     self.user_info['user_info']['gender'] = self.UI2Chatter()
+        #     self.Chatter2UI("OK, now you can ask me to do something or free talk with me.")
+        #     self.user_info['user_info']['first_meet'] = 0
+        #     json.dump(self.user_info, open(self.ui.root + '\\json\\user_info.json', 'w'))
+        # else:
+        self.Chatter2UI("Hello, I am here.")
+
+    def run(self, input_text):
+        self.UI2Chatter(self, input_text)
+
+    def Chatter2UI(self, msg):
+        self.ui.sendMessageBot(msg)
+
+    def UI2Chatter(self, input_text):
+        result = self.chatbot_response(input_text)
+        return result
+
+    def task_affair(self):
+        return 0
+
+    def task_email(self):
+        return 0
+
+    def task_search(self, msg):
+        self.t = uiThreadSearch(self,  msg)
+        self.t.output.connect(self.ui.sendMessageBot)
+        self.t.start()
         return
+
+    # match the words in sentence to bag
+    def match_words(self, sentence, words):
+        in_words = nltk.word_tokenize(sentence)
+        in_words = [self.WNL.lemmatize(word.lower()) for word in in_words]
+        bag = [0] * len(words)
+        for s in in_words:
+            flag = 0
+            for i, w in enumerate(words):
+                if s == w:
+                    bag[i] = 1
+                    flag = 1
+            if not flag:
+                i_max = 0
+                bag_max = 0
+                for i, w in enumerate(words):
+                    l = [0 if a.path_similarity(b) is None else a.path_similarity(b) for a in wordnet.synsets(s) for b
+                         in wordnet.synsets(w)]
+                    if len(l) > 0:
+                        bag_max = max(l) if max(l) > bag_max else bag_max
+                        i_max = i
+                bag[i_max] = bag_max
+        return np.array(bag)
+
+    # match the types for the sentence by pretrained model
+    def match_types(self, sentence, model):
+        bag = self.match_words(sentence, self.words)
+        res = model.predict(np.array([bag]))[0]
+        results = [[i, r] for i, r in enumerate(res)]
+        results.sort(key=lambda x: x[1], reverse=True)
+        return_list = []
+        for result in results:
+            return_list.append({"type": self.types[result[0]], "probability": result[1]})
+        return return_list
+
+    # special task special operation
+    def get_response(self, types, msg, knowledge_json):
+        tag = types[0]['type']
+        prob = types[0]['probability']
+        list_knowledge = knowledge_json['knowledge']
+        if tag == "task_affair":
+            response = "do task_affair" + "\t---confidence {}".format(prob)
+            self.task_affair()
+        elif tag == "task_email":
+            response = "do task_email" + "\t---confidence {}".format(prob)
+            self.task_email()
+        elif tag == "task_search" or prob < 0.5:
+            response = "I will google for you about " + "\"" + msg + "\" " + "\t---confidence {}".format(prob)
+            self.task_search(msg)
+        else:
+            for k in list_knowledge:
+                if k['tag'] == tag:
+                    if tag == "greeting":
+                        response = random.choice(k['out']).format(
+                            self.user_info['user_info']['name']) + "\t---confidence {}".format(prob)
+                    elif tag == "ask_user_info":
+                        response = random.choice(k['out']).format(
+                            self.user_info['user_info']['name']) + "\t---confidence {}".format(prob)
+                    else:
+                        response = random.choice(k['out']) + "\t---confidence {}".format(prob)
+                    break
+        return response
+
+    # return the response
+    def chatbot_response(self, msg):
+        ints = self.match_types(msg, self.model)
+        res = self.get_response(ints, msg, self.knowledge)
+        return res
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
