@@ -69,8 +69,8 @@ class uiThreadSearch(uiThread):
             result = botSearchKeyword(self.ui, self.text)
             self.output.emit(result)
         except:
-            result = '''We are having trouble communicating with Google,
-                please check your internet connection or try again later.'''
+            result = 'We are having trouble communicating with Google, \
+                please check your internet connection or try again later.'
             self.output.emit(result)
 
 
@@ -338,7 +338,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
             boxHeight = msgBox.document().size().height() * 1.05
             if boxHeight < 70:
                 boxHeight = 70
-            print(boxHeight)
+            # print(boxHeight)
             msgBox.setMinimumHeight(boxHeight)
             msgBox.setMaximumHeight(boxHeight)
             msgBox.parentWidget().setMinimumHeight(boxHeight)
@@ -379,16 +379,14 @@ class uiThreadChatter(uiThread):
                 self.ch.user_info['user_info']['first_meet'] = 0
                 json.dump(self.ch.user_info, open(self.ui.root + '\\Chatter\\json\\user_info.json', 'w'))
             except:
-                result = '''We are having trouble with the chatter,
-                                                please try again later.'''
+                result = '''We are having trouble with the chatter, please try again later.'''
                 self.output.emit(result)
         else:
             try:
                 result = self.ch.UI2Chatter(self.text)
                 self.output.emit(result)
             except:
-                result = '''We are having trouble with the chatter,
-                                please try again later.'''
+                result = '''We are having trouble with the chatter, please try again later.'''
                 self.output.emit(result)
 
 
@@ -415,8 +413,8 @@ class Chatter:
     def __init__(self, ex):
         self.ui = ex
         # nltk word package
-        nltk.download('punkt')
-        nltk.download('wordnet')
+        #nltk.download('punkt')
+        #nltk.download('wordnet')
         self.model = load_model(self.ui.root + '\\Chatter\\model\\chatter_model.h5')
         self.knowledge = json.loads(open(self.ui.root + '\\Chatter\\json\\knowledge.json').read())
         self.words = pickle.load(open(self.ui.root + '\\Chatter\\pkl\\words.pkl', 'rb'))
