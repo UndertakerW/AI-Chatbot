@@ -372,13 +372,24 @@ class uiThreadChatter(uiThread):
         self.text = text
 
     def run(self):
-        try:
-            result = self.ch.UI2Chatter(self.text)
-            self.output.emit(result)
-        except:
-            result = '''We are having trouble with the chatter,
-                            please try again later.'''
-            self.output.emit(result)
+        if self.ch.user_info['user_info']['first_meet'] == 1:
+            try:
+                self.ch.user_info['user_info']['name'] = self.text
+                self.output.emit("OK, {}, now you can ask me to do something or free talk with me.".format(self.text))
+                self.ch.user_info['user_info']['first_meet'] = 0
+                json.dump(self.ch.user_info, open(self.ui.root + '\\Chatter\\json\\user_info.json', 'w'))
+            except:
+                result = '''We are having trouble with the chatter,
+                                                please try again later.'''
+                self.output.emit(result)
+        else:
+            try:
+                result = self.ch.UI2Chatter(self.text)
+                self.output.emit(result)
+            except:
+                result = '''We are having trouble with the chatter,
+                                please try again later.'''
+                self.output.emit(result)
 
 
 class uiThreadSpeech(uiThread):
@@ -413,19 +424,12 @@ class Chatter:
         self.WNL = WordNetLemmatizer()
         self.user_info = json.loads(open(self.ui.root + '\\Chatter\\json\\user_info.json').read())
 
-        #check whether it is first meet
-        # if self.user_info['user_info']['first_meet'] == 1:
-        #     self.Chatter2UI("Hello, nice to meet you! I am your chat bot.")
-        #     self.Chatter2UI("As this is our first meeting, to provide a better assistance, I would like to ask you some question.")
-        #     self.ui.Chatter2UI("First, what is your name?")
-        #     self.user_info['user_info']['name'] = self.UI2Chatter()
-        #     self.ui.Chatter2UI("Second, what is your gender?")
-        #     self.user_info['user_info']['gender'] = self.UI2Chatter()
-        #     self.Chatter2UI("OK, now you can ask me to do something or free talk with me.")
-        #     self.user_info['user_info']['first_meet'] = 0
-        #     json.dump(self.user_info, open(self.ui.root + '\\json\\user_info.json', 'w'))
-        # else:
-        self.Chatter2UI("Hello, I am here.")
+        # check whether it is first meet
+        if self.user_info['user_info']['first_meet'] == 1:
+            self.Chatter2UI("Hello, nice to meet you! I am your chat bot.")
+            self.Chatter2UI("As this is our first meeting, to provide a better assistance, I would like to ask your name.")
+        else:
+            self.Chatter2UI("Hello, I am here.")
 
     def run(self, input_text):
         self.UI2Chatter(self, input_text)
