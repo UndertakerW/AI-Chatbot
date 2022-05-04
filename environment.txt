@@ -6,3 +6,8 @@ pip install system_hotkey
 
 # Search
 pip install bs4 
+
+# Filter & Scheduler
+pip install nltk
+pip install sklearn
+pip install pandas
