@@ -5,7 +5,10 @@ pip install requests
 pip install system_hotkey
 
 # Search
-pip install bs4 
+pip install bs4
+# Install googlesearch by
+# 1. cd ChatBot\packages\googlesearch
+# 2. python setup.py install
 
 # Filter & Scheduler
 pip install nltk
