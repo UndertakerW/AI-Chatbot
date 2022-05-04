@@ -372,8 +372,13 @@ class uiThreadChatter(uiThread):
         self.text = text
 
     def run(self):
-        result = self.ch.UI2Chatter(self.text)
-        self.output.emit(result)
+        try:
+            result = self.ch.UI2Chatter(self.text)
+            self.output.emit(result)
+        except:
+            result = '''We are having trouble with the chatter,
+                            please try again later.'''
+            self.output.emit(result)
 
 
 class uiThreadSpeech(uiThread):
