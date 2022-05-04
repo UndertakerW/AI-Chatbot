@@ -69,8 +69,8 @@ class uiThreadSearch(uiThread):
             result = botSearchKeyword(self.ui, self.text)
             self.output.emit(result)
         except:
-            result = '''We are having trouble communicating with Google,
-                please check your internet connection or try again later.'''
+            result = 'We are having trouble communicating with Google, \
+                please check your internet connection or try again later.'
             self.output.emit(result)
 
 
@@ -338,7 +338,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
             boxHeight = msgBox.document().size().height() * 1.05
             if boxHeight < 70:
                 boxHeight = 70
-            print(boxHeight)
+            # print(boxHeight)
             msgBox.setMinimumHeight(boxHeight)
             msgBox.setMaximumHeight(boxHeight)
             msgBox.parentWidget().setMinimumHeight(boxHeight)
@@ -379,16 +379,14 @@ class uiThreadChatter(uiThread):
                 self.ch.user_info['user_info']['first_meet'] = 0
                 json.dump(self.ch.user_info, open(self.ui.root + '\\Chatter\\json\\user_info.json', 'w'))
             except:
-                result = '''We are having trouble with the chatter,
-                                                please try again later.'''
+                result = '''We are having trouble with the chatter, please try again later.'''
                 self.output.emit(result)
         else:
             try:
                 result = self.ch.UI2Chatter(self.text)
                 self.output.emit(result)
             except:
-                result = '''We are having trouble with the chatter,
-                                please try again later.'''
+                result = '''We are having trouble with the chatter, please try again later.'''
                 self.output.emit(result)
 
 
@@ -456,7 +454,6 @@ class Chatter:
     def match_words(self, sentence, words):
         in_words = nltk.word_tokenize(sentence)
         in_words = [self.WNL.lemmatize(word.lower()) for word in in_words]
-        print(in_words)
         bag = [0] * len(words)
         for s in in_words:
             flag = 0

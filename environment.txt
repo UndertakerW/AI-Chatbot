@@ -18,3 +18,4 @@ pip install pandas
 # NLP
 pip install tensorflow
 pip install SpeechRecognition
+pip install keras
