@@ -15,7 +15,6 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QColor
 from PyQt5.QtWidgets import QApplication, QFontDialog, QLabel, QFileDialog, QSizePolicy
 from PyQt5.QtCore import QFileInfo
-from system_hotkey import SystemHotkey
 
 from search import searchKeyword
 from search import botSearchKeyword
