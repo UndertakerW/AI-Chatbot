@@ -7,10 +7,12 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizer_v2.gradient_descent import SGD
 from nltk.stem import WordNetLemmatizer
+import os
 
 # nltk word package
 # nltk.download('punkt')
 # nltk.download('wordnet')
+nltk.data.path.append(os.path.dirname(os.path.abspath('.')) + "\\nltk_data\\")
 
 # initialize the dataset
 # store the input words

@@ -415,8 +415,7 @@ class Chatter:
     def __init__(self, ex):
         self.ui = ex
         # nltk word package
-        nltk.download('punkt')
-        nltk.download('wordnet')
+        nltk.data.path.append(self.ui.root + "\\nltk_data\\")
         self.model = load_model(self.ui.root + '\\Chatter\\model\\chatter_model.h5')
         self.knowledge = json.loads(open(self.ui.root + '\\Chatter\\json\\knowledge.json').read())
         self.words = pickle.load(open(self.ui.root + '\\Chatter\\pkl\\words.pkl', 'rb'))
@@ -457,6 +456,7 @@ class Chatter:
     def match_words(self, sentence, words):
         in_words = nltk.word_tokenize(sentence)
         in_words = [self.WNL.lemmatize(word.lower()) for word in in_words]
+        print(in_words)
         bag = [0] * len(words)
         for s in in_words:
             flag = 0
