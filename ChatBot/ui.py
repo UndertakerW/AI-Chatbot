@@ -399,8 +399,8 @@ class Chatter:
     def __init__(self, ex):
         self.ui = ex
         # nltk word package
-        # nltk.download('punkt')
-        # nltk.download('wordnet')
+        nltk.download('punkt')
+        nltk.download('wordnet')
         self.model = load_model(self.ui.root + '\\Chatter\\model\\chatter_model.h5')
         self.knowledge = json.loads(open(self.ui.root + '\\Chatter\\json\\knowledge.json').read())
         self.words = pickle.load(open(self.ui.root + '\\Chatter\\pkl\\words.pkl', 'rb'))

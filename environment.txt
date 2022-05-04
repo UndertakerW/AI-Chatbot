@@ -14,3 +14,7 @@ pip install bs4
 pip install nltk
 pip install sklearn
 pip install pandas
+
+# NLP
+pip install tensorflow
+pip install SpeechRcognition
