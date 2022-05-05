@@ -224,14 +224,14 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.pushButton_speak.setText(_translate("TabWidget", "Speak"))
 
         TabWidget.setTabText(TabWidget.indexOf(self.tab),
-                             _translate("TabWidget", "CHAT"))
+                             _translate("TabWidget", "Chatting"))
         self.pushButton_2.setText(_translate("TabWidget", "Set Font"))
 
         self.pushButton_3.setText(_translate("TabWidget", "Set Font Size"))
 
         self.pushButton_4.setText(_translate("TabWidget", "Set Avatar"))
         TabWidget.setTabText(TabWidget.indexOf(self.tab_2),
-                             _translate("TabWidget", "SET"))
+                             _translate("TabWidget", "Settings"))
         self.textBrowser.setHtml(_translate("TabWidget", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
                                             "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
                                             "p, li { white-space: pre-wrap; }\n"
@@ -241,7 +241,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.label_2.setText(_translate(
             "TabWidget", "CSC3180 Project - Chat Bot"))
         TabWidget.setTabText(TabWidget.indexOf(self.tab_3),
-                             _translate("TabWidget", "INFO"))
+                             _translate("TabWidget", "Info"))
 
         # Set Font
     def setFontFamily(self):
