@@ -496,7 +496,7 @@ class Chatter:
             response = "do task_email" + "\t---confidence {}".format(prob)
             self.task_email()
         elif tag == "task_search" or prob < 0.5:
-            response = "I will google for you about " + "\"" + msg + "\" " + "\t---confidence {}".format(prob)
+            response = "I will google " + "\"" + msg + "\" " + " for you, please wait.\t---confidence {}".format(prob)
             self.task_search(msg)
         else:
             for k in list_knowledge:
