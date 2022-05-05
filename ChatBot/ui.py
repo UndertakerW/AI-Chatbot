@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
 from PyQt5.QtCore import pyqtSignal, QUrl
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QColor
 from PyQt5.QtWidgets import QApplication, QFontDialog, QLabel, QFileDialog, QSizePolicy
-from PyQt5.QtCore import QFileInfo
+from PyQt5.QtCore import QFileInfo, QCoreApplication
 
 from search import searchKeyword
 from search import botSearchKeyword
@@ -304,6 +304,8 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
 
     def addDialog(self, sender, text):
         chatBlock = QtWidgets.QLabel()
+        chatBlock.setGeometry(QtCore.QRect(0, 0, 1240, 451))
+        chatBlock.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         avatar = QtWidgets.QLabel(chatBlock)
         avatar.setGeometry(10, 10, 50, 50)
         avatar.setAlignment(QtCore.Qt.AlignCenter)
@@ -320,18 +322,20 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         msgBox.setGeometry(QtCore.QRect(70, 0, 1170, 451))
         msgBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         msgBox.setObjectName("msgBox"+str(self.dialog_id))
+        #msgBox.document().setPlainText(str(text))
         msgBox.setText(str(text))
-        boxHeight = msgBox.document().size().height() * (msgBox.document().lineCount() + 0.1)
+        self.verticalLayout.addWidget(chatBlock)
+        self.msgBoxes.append(msgBox)
+        # Force the UI to update so that msgBox.document().size().height() works correctly
+        QtWidgets.qApp.processEvents()
+        boxHeight = msgBox.document().size().height() * 1.05
         if boxHeight < 70:
             boxHeight = 70
         # print(boxHeight)
         msgBox.setMinimumHeight(boxHeight)
         msgBox.setMaximumHeight(boxHeight)
-        self.msgBoxes.append(msgBox)
-        chatBlock.setGeometry(QtCore.QRect(0, 0, 1240, 451))
         chatBlock.setMinimumHeight(boxHeight)
         chatBlock.setMaximumHeight(boxHeight)
-        self.verticalLayout.addWidget(chatBlock)
 
     def resetDialog(self):
         for msgBox in self.msgBoxes:
