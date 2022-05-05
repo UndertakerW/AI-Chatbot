@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets, QtMultimedia
 from PyQt5.QtCore import pyqtSignal, QUrl
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QColor
 from PyQt5.QtWidgets import QApplication, QFontDialog, QLabel, QFileDialog, QSizePolicy
-from PyQt5.QtCore import QFileInfo
+from PyQt5.QtCore import QFileInfo, QCoreApplication
 
 from search import searchKeyword
 from search import botSearchKeyword
@@ -224,14 +224,14 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.pushButton_speak.setText(_translate("TabWidget", "Speak"))
 
         TabWidget.setTabText(TabWidget.indexOf(self.tab),
-                             _translate("TabWidget", "CHAT"))
+                             _translate("TabWidget", "Chatting"))
         self.pushButton_2.setText(_translate("TabWidget", "Set Font"))
 
         self.pushButton_3.setText(_translate("TabWidget", "Set Font Size"))
 
         self.pushButton_4.setText(_translate("TabWidget", "Set Avatar"))
         TabWidget.setTabText(TabWidget.indexOf(self.tab_2),
-                             _translate("TabWidget", "SET"))
+                             _translate("TabWidget", "Settings"))
         self.textBrowser.setHtml(_translate("TabWidget", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
                                             "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
                                             "p, li { white-space: pre-wrap; }\n"
@@ -241,7 +241,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.label_2.setText(_translate(
             "TabWidget", "CSC3180 Project - Chat Bot"))
         TabWidget.setTabText(TabWidget.indexOf(self.tab_3),
-                             _translate("TabWidget", "INFO"))
+                             _translate("TabWidget", "Info"))
 
         # Set Font
     def setFontFamily(self):
@@ -304,6 +304,8 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
 
     def addDialog(self, sender, text):
         chatBlock = QtWidgets.QLabel()
+        chatBlock.setGeometry(QtCore.QRect(0, 0, 1240, 451))
+        chatBlock.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         avatar = QtWidgets.QLabel(chatBlock)
         avatar.setGeometry(10, 10, 50, 50)
         avatar.setAlignment(QtCore.Qt.AlignCenter)
@@ -320,18 +322,20 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         msgBox.setGeometry(QtCore.QRect(70, 0, 1170, 451))
         msgBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         msgBox.setObjectName("msgBox"+str(self.dialog_id))
+        #msgBox.document().setPlainText(str(text))
         msgBox.setText(str(text))
-        boxHeight = msgBox.document().size().height() * (msgBox.document().lineCount() + 0.1)
+        self.verticalLayout.addWidget(chatBlock)
+        self.msgBoxes.append(msgBox)
+        # Force the UI to update so that msgBox.document().size().height() works correctly
+        QtWidgets.qApp.processEvents()
+        boxHeight = msgBox.document().size().height() * 1.05
         if boxHeight < 70:
             boxHeight = 70
         # print(boxHeight)
         msgBox.setMinimumHeight(boxHeight)
         msgBox.setMaximumHeight(boxHeight)
-        self.msgBoxes.append(msgBox)
-        chatBlock.setGeometry(QtCore.QRect(0, 0, 1240, 451))
         chatBlock.setMinimumHeight(boxHeight)
         chatBlock.setMaximumHeight(boxHeight)
-        self.verticalLayout.addWidget(chatBlock)
 
     def resetDialog(self):
         for msgBox in self.msgBoxes:
@@ -496,7 +500,7 @@ class Chatter:
             response = "do task_email" + "\t---confidence {}".format(prob)
             self.task_email()
         elif tag == "task_search" or prob < 0.5:
-            response = "I will google for you about " + "\"" + msg + "\" " + "\t---confidence {}".format(prob)
+            response = "I will google " + "\"" + msg + "\" " + " for you, please wait.\t---confidence {}".format(prob)
             self.task_search(msg)
         else:
             for k in list_knowledge:

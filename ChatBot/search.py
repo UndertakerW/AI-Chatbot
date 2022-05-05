@@ -25,7 +25,7 @@ def searchKeyword(keyword, num_results=10):
 
 def botSearchKeyword(ui, keyword, num_results=5):
     result = searchKeyword(keyword, num_results=num_results)
-    text = ''
+    text = 'The Google search results for \"{}\" is:\n'.format(keyword)
     for (title, url) in result:
         text += title
         text += '\n'
