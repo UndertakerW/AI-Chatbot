@@ -7,11 +7,13 @@ import speech_recognition as sr
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 from keras.models import load_model
+import os
 
 
 # nltk word package
 # nltk.download('punkt')
 # nltk.download('wordnet')
+nltk.data.path.append(os.path.dirname(os.path.abspath('.')) + "\\nltk_data\\")
 model = load_model('model/chatter_model.h5')
 knowledge = json.loads(open('json/knowledge.json').read())
 words = pickle.load(open('pkl/words.pkl', 'rb'))
