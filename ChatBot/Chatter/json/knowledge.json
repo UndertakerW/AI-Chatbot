@@ -69,6 +69,11 @@
      "out": ["I am a chat robot which can assist your daily work. \n 1. Search information online\n 2. Filter your email\n 3. Schedule your affairs according to significance\n 4. have a free talk with you"],
      "context": [""]
     },
+    {"tag": "AI",
+     "in": ["What is AI?", "What is Artificial intelligence?", "How to learn Artificial intelligence?"],
+     "out": ["You need to take CSC3180 to know more about AI"],
+      "context": [""]
+    },
     {"tag": "task_affair",
      "in": ["Order the Affair", "Schedule the Affair", "Help me schedule my Affair", "Affair Scheduler", "What is my plan"],
      "out": ["The affairs are scheduled according to significance!"],
