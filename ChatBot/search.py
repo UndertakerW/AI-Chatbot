@@ -23,7 +23,7 @@ def searchKeyword(keyword, num_results=10):
             result.append(('Webpage', url))
     return result
 
-def botSearchKeyword(ui, keyword, num_results=5):
+def botSearchKeyword(keyword, num_results=5):
     result = searchKeyword(keyword, num_results=num_results)
     text = 'The Google search results for \"{}\" is:\n'.format(keyword)
     for (title, url) in result:

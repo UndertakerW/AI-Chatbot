@@ -74,11 +74,6 @@
      "out": ["You need to take CSC3180 to know more about AI"],
       "context": [""]
     },
-    {"tag": "task_affair",
-     "in": ["Order the Affair", "Schedule the Affair", "Help me schedule my Affair", "Affair Scheduler", "What is my plan"],
-     "out": ["The affairs are scheduled according to significance!"],
-     "context": [""]
-    },
     {"tag": "task_search",
      "in": ["Search for the weather today", "Search for what time is it in BeiJing?"],
      "out": ["I will google for you."],

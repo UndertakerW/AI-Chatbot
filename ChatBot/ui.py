@@ -62,36 +62,38 @@ class uiThread(QtCore.QThread):
 
 class uiThreadSearch(uiThread):
 
-    def __init__(self, ui, text):
+    def __init__(self, text):
         uiThread.__init__(self)
-        self.ui = ui
         self.text = text
 
     def run(self):
         try:
-            result = botSearchKeyword(self.ui, self.text)
+            result = botSearchKeyword(self.text)
             self.output.emit(result)
         except:
             result = 'We are having trouble communicating with Google, \
                 please check your internet connection or try again later.'
             self.output.emit(result)
-      
+
 class uiThreadEmailFilter(uiThread):
 
-    def __init__(self, ui, text):
+    def __init__(self, ui):
         uiThread.__init__(self)
         self.ui = ui
-        self.text = text
 
     def run(self):
         try:
-            result = filterEmail(self.ui, self.text)
+            self.ui.TabWidget.setCurrentIndex(1)
+            self.ui.showEmails()
+            self.ui.filterEmails()
+            result = '''Email Filtered'''
             self.output.emit(result)
         except:
             result = '''We are having trouble filtering the email,
                 please try again later.'''
             self.output.emit(result)  
-            
+
+
 class uiThreadAffairScheduler(uiThread):
 
     def __init__(self, ui, text):
@@ -286,7 +288,10 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         filename = QFileDialog.getOpenFileNames(
             self, 'Select an image', os.getcwd(), "Image Files(*.ico *.jpg *.png *.bmp)")
         print(filename)
-        self.avatar = QPixmap(filename[0][0]).scaled(50, 50)
+        try:
+            self.avatar = QPixmap(filename[0][0]).scaled(50, 50)
+        except:
+            return
 
     def retranslateUi(self, TabWidget):
         _translate = QtCore.QCoreApplication.translate
@@ -451,6 +456,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
     #     return
 
     def addEmail(self, sender="", text="", label=""):
+
         emailBox = QtWidgets.QTextBrowser(self.tab_4)
         emailBox.setGeometry(QtCore.QRect(20, 0, 1200, 451))
         emailBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
@@ -508,7 +514,6 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
                 count += 1
                 if count > self.max_n_emails:
                     break
-
         QtWidgets.qApp.processEvents()
         
 
@@ -518,6 +523,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
             # TODO: get the label
             label = filterEmail(text)
             self.setEmailLabel(emailBox, label)
+
 
 class uiThreadChatter(uiThread):
     def __init__(self, ui, text):
@@ -596,10 +602,13 @@ class Chatter:
     def task_affair(self):
         return 0
 
-    def task_email(self, msg):
-        self.t = uiThreadEmailFilter(self, msg)
-        self.t.output.connect(self.ui.sendMessageBot)
-        self.t.start()
+    def task_email(self):
+        self.ui.TabWidget.setCurrentIndex(1)
+        self.ui.showEmails()
+        self.ui.filterEmails()
+        # self.t = uiThreadEmailFilter(self.ui)
+        # self.t.output.connect(self.ui.sendMessageBot)
+        # self.t.start()
         return
 
     def task_search(self, msg):

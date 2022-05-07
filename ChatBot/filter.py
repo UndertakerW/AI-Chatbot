@@ -50,12 +50,10 @@ def update(emails):
     return cv.transform(up)
 
 
-
-
-def filterEmail(ui, email):
+def filterEmail(email):
     # 多段文本转换成一行字符串
     email = ' '.join(email.split())
-    
+
     model = joblib.load(root+"\\filter_model.m")
     
     emails = []
@@ -63,6 +61,7 @@ def filterEmail(ui, email):
     emails.append(email)
 
     emails = update(emails)
+
 
     y_pred = model.predict(emails)
 
