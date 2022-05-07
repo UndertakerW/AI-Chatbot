@@ -102,4 +102,3 @@ def schedule(ui, text):
 if __name__ == '__main__':
     # schedule(2)
     pass
-
