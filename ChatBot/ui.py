@@ -34,6 +34,7 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet
 from keras.models import load_model
 import speech_recognition as sr
+import csv
 
 
 class uiThread(QtCore.QThread):
@@ -117,12 +118,15 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.setupUi(self)
         self.retranslateUi(self)
         self.dialog_id = 0
+        self.email_id = 0
         self.msgBoxes = list()
+        self.emailBoxes = list()
         self.avatar = QPixmap(self.root + '\\avatar.ico')
         self.avatarBot = QPixmap(self.root + '\\avatarBot.ico')
         self.ch = Chatter(self)
         self.audio = None
         self.r = sr.Recognizer()
+        self.max_n_emails=50
 
 
     def setupUi(self, TabWidget):
@@ -141,7 +145,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.scrollArea.verticalScrollBar().rangeChanged.connect(
-                self.scrollToBottom, QtCore.Qt.UniqueConnection)
+                self.scrollToBottomChatBox, QtCore.Qt.UniqueConnection)
         self.verticalLayout = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -180,6 +184,39 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         # self.verticalScrollBar.setObjectName("verticalScrollBar")
         TabWidget.addTab(self.tab, "")
 
+        self.tab_4 = QtWidgets.QWidget()
+        self.tab_4.setObjectName("tab_4")
+        self.scrollAreaEmail = QtWidgets.QScrollArea(self.tab_4)
+        self.scrollAreaEmail.setGeometry(QtCore.QRect(20, 20, 1240, 550))
+        self.scrollAreaEmail.setWidgetResizable(True)
+        self.scrollAreaEmail.setObjectName("scrollAreaEmail")
+        self.scrollAreaEmailWidgetContents = QtWidgets.QWidget()
+        self.scrollAreaEmailWidgetContents.setGeometry(QtCore.QRect(0, 0, 1240, 451))
+        self.scrollAreaEmailWidgetContents.setObjectName("scrollAreaEmailWidgetContents")
+        self.scrollAreaEmail.setWidget(self.scrollAreaEmailWidgetContents)
+        self.verticalLayoutEmail = QtWidgets.QVBoxLayout(self.scrollAreaEmailWidgetContents)
+        self.verticalLayoutEmail.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayoutEmail.setObjectName("verticalLayoutEmail")
+        self.verticalLayoutEmail.setSizeConstraint(QtWidgets.QLayout.SetNoConstraint)
+        self.verticalLayoutEmail.setAlignment(QtCore.Qt.AlignTop)
+        self.pushButtonShowEmail = QtWidgets.QPushButton(self.tab_4)
+        self.pushButtonShowEmail.setGeometry(QtCore.QRect(300, 580, 300, 100))
+        self.pushButtonShowEmail.clicked.connect(self.showEmails)
+        font = QtGui.QFont()
+        font.setPointSize(15)
+        self.pushButtonShowEmail.setFont(font)
+        self.pushButtonShowEmail.setObjectName("pushButtonShowEmail")
+        self.pushButtonFilterEmail = QtWidgets.QPushButton(self.tab_4)
+        self.pushButtonFilterEmail.setGeometry(QtCore.QRect(680, 580, 300, 100))
+        self.pushButtonFilterEmail.clicked.connect(self.filterEmails)
+        font = QtGui.QFont()
+        font.setPointSize(15)
+        self.pushButtonFilterEmail.setFont(font)
+        self.pushButtonFilterEmail.setObjectName("pushButtonFilterEmail")
+        
+        TabWidget.addTab(self.tab_4, "")
+
+
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
         self.pushButton_2 = QtWidgets.QLabel(self.tab_2)
@@ -208,6 +245,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         self.pushButton_4.setGeometry(QtCore.QRect(340, 333, 620, 55))
         self.pushButton_4.setObjectName("pushButton_4")
         TabWidget.addTab(self.tab_2, "")
+
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3 = QtWidgets.QWidget()
         self.tab_3.setObjectName("tab_3")
@@ -275,6 +313,11 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
             "TabWidget", "CSC3180 Project - Chat Bot"))
         TabWidget.setTabText(TabWidget.indexOf(self.tab_3),
                              _translate("TabWidget", "Info"))
+        
+        TabWidget.setTabText(TabWidget.indexOf(self.tab_4),
+                             _translate("TabWidget", "Emails"))
+        self.pushButtonShowEmail.setText(_translate("TabWidget", "Show Emails"))
+        self.pushButtonFilterEmail.setText(_translate("TabWidget", "Filter Emails"))
 
         # Set Font
     def setFontFamily(self):
@@ -284,14 +327,14 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         font = QtGui.QFont()
         font.setFamily(fontDict[text])
         self.TabWidget.setFont(font)
-        self.resetDialog()
+        self.resetDialogsAndEmails()
 
     def setFontSize(self):
         text = self.comboBox_2.currentText()
         font = QtGui.QFont()
         font.setPointSize(int(text))
         self.TabWidget.setFont(font)
-        self.resetDialog()
+        self.resetDialogsAndEmails()
 
     def sendMessageUser(self, text):
         self.addDialog("User", text)
@@ -370,7 +413,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         chatBlock.setMinimumHeight(boxHeight)
         chatBlock.setMaximumHeight(boxHeight)
 
-    def resetDialog(self):
+    def resetDialogsAndEmails(self):
         for msgBox in self.msgBoxes:
             boxHeight = msgBox.document().size().height() * 1.05
             if boxHeight < 70:
@@ -380,8 +423,15 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
             msgBox.setMaximumHeight(boxHeight)
             msgBox.parentWidget().setMinimumHeight(boxHeight)
             msgBox.parentWidget().setMaximumHeight(boxHeight)
+        for emailBox in self.emailBoxes:
+            boxHeight = emailBox.document().size().height() * 1.05
+            if boxHeight < 70:
+                boxHeight = 70
+            # print(boxHeight)
+            emailBox.setMinimumHeight(boxHeight)
+            emailBox.setMaximumHeight(boxHeight)
 
-    def scrollToBottom(self):
+    def scrollToBottomChatBox(self):
         scrollBar = self.scrollArea.verticalScrollBar()
         scrollBar.setValue(scrollBar.maximum())
 
@@ -400,6 +450,79 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
     #     msg = ""
     #     return
 
+    def addEmail(self, sender="", text="", label=""):
+        emailBox = QtWidgets.QTextBrowser(self.tab_4)
+        emailBox.setGeometry(QtCore.QRect(20, 0, 1200, 451))
+        emailBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        emailBox.setObjectName("emailBox"+str(self.email_id))
+        self.email_id += 1
+        #msgBox.document().setPlainText(str(text))
+        emailBox.setText(str(text))
+        emailBox.setAutoFillBackground(True)
+        if label != "":
+            p = emailBox.viewport().palette()
+            if label == "ham":
+                p.setColor(emailBox.viewport().backgroundRole(), QColor(149, 236, 105))
+            elif label == "spam":
+                p.setColor(emailBox.viewport().backgroundRole(), QColor(255, 106, 106))
+            emailBox.viewport().setPalette(p)
+        self.verticalLayoutEmail.addWidget(emailBox)
+        self.emailBoxes.append(emailBox)
+        # Force the UI to update so that msgBox.document().size().height() works correctly
+        QtWidgets.qApp.processEvents()
+        boxHeight = emailBox.document().size().height() * 1.05
+        if boxHeight < 70:
+            boxHeight = 70
+        # print(boxHeight)
+        emailBox.setMinimumHeight(boxHeight)
+        emailBox.setMaximumHeight(boxHeight)
+
+    def setEmailLabel(self, emailBox, label):
+        p = emailBox.viewport().palette()
+        if label == "ham":
+            p.setColor(emailBox.viewport().backgroundRole(), QColor(149, 236, 105))
+        elif label == "spam":
+            p.setColor(emailBox.viewport().backgroundRole(), QColor(255, 106, 106))
+        emailBox.viewport().setPalette(p)
+
+    def showEmails(self):
+        
+        item_list = list(range(self.verticalLayoutEmail.count()))
+        item_list.reverse()
+
+        for i in item_list:
+            item = self.verticalLayoutEmail.itemAt(i)
+            self.verticalLayoutEmail.removeItem(item)
+            if item.widget():
+                item.widget().deleteLater()
+        
+        QtWidgets.qApp.processEvents()
+        
+        self.emailBoxes.clear()
+
+        count = 0
+        with open(self.root+'//spam.csv', 'r', encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                self.addEmail(text=row[1])
+                count += 1
+                if count > self.max_n_emails:
+                    break
+
+        QtWidgets.qApp.processEvents()
+        
+
+    def filterEmails(self):
+        for emailBox in self.emailBoxes:
+            text = emailBox.document().toPlainText()
+            # TODO: get the label
+            import random
+            label = random.randint(0,1)
+            if label == 0:
+                label = "ham"
+            if label == 1:
+                label = "spam"
+            self.setEmailLabel(emailBox, label)
 
 class uiThreadChatter(uiThread):
     def __init__(self, ui, text):
