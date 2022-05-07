@@ -516,12 +516,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         for emailBox in self.emailBoxes:
             text = emailBox.document().toPlainText()
             # TODO: get the label
-            import random
-            label = random.randint(0,1)
-            if label == 0:
-                label = "ham"
-            if label == 1:
-                label = "spam"
+            label = filterEmail(text)
             self.setEmailLabel(emailBox, label)
 
 class uiThreadChatter(uiThread):
