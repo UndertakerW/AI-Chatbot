@@ -67,7 +67,3 @@ def filterEmail(ui, email):
 
     return y_pred[0]  # the return value type is <class 'numpy.str_'>
 
-
-if __name__ == '__main__':
-    pass
-    # filterEmail()
