@@ -50,13 +50,14 @@ def update(emails):
     return cv.transform(up)
 
 
-model = joblib.load(root+"\\filter_model.m")
 
 
 def filterEmail(ui, email):
     # 多段文本转换成一行字符串
     email = ' '.join(email.split())
-
+    
+    model = joblib.load(root+"\\filter_model.m")
+    
     emails = []
 
     emails.append(email)
