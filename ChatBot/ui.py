@@ -75,7 +75,7 @@ class uiThreadSearch(uiThread):
                 please check your internet connection or try again later.'
             self.output.emit(result)
       
- class uiThreadEmailFilter(uiThread):
+class uiThreadEmailFilter(uiThread):
 
     def __init__(self, ui, text):
         uiThread.__init__(self)
