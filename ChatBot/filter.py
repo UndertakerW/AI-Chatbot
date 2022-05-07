@@ -5,7 +5,10 @@ from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
-df = pd.read_csv('spam.csv', encoding='ISO-8859-1')
+
+from PyQt5.QtCore import QFileInfo
+root = QFileInfo(__file__).absolutePath()
+df = pd.read_csv(root+'\\spam.csv', encoding='ISO-8859-1')
 
 data = df.to_numpy()
 
@@ -47,7 +50,7 @@ def update(emails):
     return cv.transform(up)
 
 
-model = joblib.load("filter_model.m")
+model = joblib.load(root+"\\filter_model.m")
 
 
 def filterEmail(ui, email):
