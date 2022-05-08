@@ -615,7 +615,7 @@ class Chatter:
         return "task_email"
 
     def task_search(self, msg):
-        self.t = uiThreadSearch(self,  msg)
+        self.t = uiThreadSearch(msg)
         self.t.output.connect(self.ui.sendMessageBot)
         self.t.start()
         return
