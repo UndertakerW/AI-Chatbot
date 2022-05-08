@@ -1,3 +1,5 @@
+# Python version 3.7.8 64-bit
+
 # UI
 pip install pyqt5
 pip install pyqt5-tools
