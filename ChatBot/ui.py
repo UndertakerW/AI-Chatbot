@@ -361,6 +361,7 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
                 self.t = uiThreadChatter(self, text)
                 #self.t = uiThreadSearch(self, text)
                 self.t.output.connect(self.sendMessageBot)
+                #self.t.showEmailsSignal.connect(self.showAndFilterEmails)
                 self.t.start()
         # If self.t is not defined (the first task)
         # Start a new task
@@ -380,6 +381,9 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
         
     # TODO: AI sends output to here
     def sendMessageBot(self, text):
+        if text == "task_email":
+            self.showAndFilterEmails()
+            text = "Redirecting to the email tab"
         self.player_1.play()
         self.addDialog("Bot", text)
 
@@ -524,6 +528,11 @@ class Ui_TabWidget(QtWidgets.QTabWidget):
             label = filterEmail(text)
             self.setEmailLabel(emailBox, label)
 
+    def showAndFilterEmails(self):
+        self.setCurrentIndex(1)
+        self.showEmails()
+        self.filterEmails()
+
 
 class uiThreadChatter(uiThread):
     def __init__(self, ui, text):
@@ -603,13 +612,7 @@ class Chatter:
         return 0
 
     def task_email(self):
-        self.ui.TabWidget.setCurrentIndex(1)
-        self.ui.showEmails()
-        self.ui.filterEmails()
-        # self.t = uiThreadEmailFilter(self.ui)
-        # self.t.output.connect(self.ui.sendMessageBot)
-        # self.t.start()
-        return
+        return "task_email"
 
     def task_search(self, msg):
         self.t = uiThreadSearch(self,  msg)
@@ -661,7 +664,7 @@ class Chatter:
             self.task_affair()
         elif tag == "task_email":
             response = "do task_email" + "\t---confidence {}".format(prob)
-            self.task_email()
+            response = self.task_email()
         elif tag == "task_search" or prob < 0.5:
             response = "I will google " + "\"" + msg + "\" " + " for you, please wait.\t---confidence {}".format(prob)
             self.task_search(msg)
