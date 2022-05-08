@@ -70,7 +70,7 @@
      "context": [""]
     },
     {"tag": "AI",
-     "in": ["What is AI?", "What is Artificial intelligence?", "How to learn Artificial intelligence?"],
+     "in": ["AI?", "Artificial intelligence?", "learn Artificial intelligence?"],
      "out": ["You need to take CSC3180 to know more about AI"],
       "context": [""]
     },
